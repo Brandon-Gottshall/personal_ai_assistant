@@ -1,16 +1,43 @@
-# my_ai_assistant
+# Personal AI Assistant
 
-A new Flutter project.
+This project is a personal AI assistant intended to act in aiding human executive function. 
 
-## Getting Started
+It is a work in progress and is currently in the early stages of development.
 
-This project is a starting point for a Flutter application.
+## Planned Features
 
-A few resources to get you started if this is your first Flutter project:
+#### MVP
+- [X] Basic conversation (Using OpenAI's Assistant API)
+- [ ] Text-to-speech
+- [ ] Voice recognition
+- [ ] Executive Data Aggregation
+  - Stores data about the user's schedule and tasks in a database. This is necessary for the assistant to be able to analyze subtle differences in-between user sessions.
+  - [ ] Apple Ecosystem Integration
+    - [ ] Apple Reminders
+    - [ ] Apple Calendar 
+  - [ ] Google Ecosystem Integration
+    - [ ] Google Calendar
+    - [ ] Google Tasks
+  - [ ] Microsoft Ecosystem Integration
+    - [ ] Microsoft To-Do
+    - [ ] Microsoft Calendar
+- [ ] Create a mechanism for the assistant to be able to add, remove, and modify tasks and events on all integrated platforms.
+  - [ ] This may be through the use of Microsoft's Python Library AutoGen.
+    - Python can be run in Dart using the (`python_ffi`)[https://pub.dev/packages/python_ffi] library.
+  
+- [ ] Executive Planning
+  - [ ] Daily Briefing
+    - [ ] Uses data aggregation to provide a daily briefing of the user's schedule and tasks
+  - [ ] Task Management
+    - [ ] Ability to add, remove, and modify tasks on all integrated platforms
+    - [ ] Ability to customize preferences for default task platform as well as default task list.
+  - [ ] Calendar Management
+    - [ ] Ability to add, remove, and modify calendar events on all integrated platforms
+    - [ ] Ability to customize preferences for default calendar platform as well as default calendar.
+  - [ ] Chronological Interactions with Assistant API to plan and modify your schedule throughout the day.  
+    
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#### Stretch Goals
+- [ ] Executive Analysis
+  - [ ] Ability to analyze user's habits and provide ways the user could optimize their use of time.
+- [ ] Separate services into Dart isolates to improve performance
