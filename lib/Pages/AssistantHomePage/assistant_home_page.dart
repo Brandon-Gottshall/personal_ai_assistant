@@ -96,11 +96,13 @@ void _sendMessage() async {
                 const Text('Personal Assistant'),
                 IconButton(
                   icon: const Icon(Icons.settings),
-                  onPressed: () => {}, // Add settings page navigation
+                  onPressed: () => {
+                    Navigator.pushNamed(context, '/settings')
+                  }, // Add settings page navigation
                 ),
 ],)
           ),
-        ),
+        ),  
       ),
       body: Container(
         color: Colors.black87,
@@ -131,7 +133,7 @@ void _sendMessage() async {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 30),
+              padding: const EdgeInsets.fromLTRB(8, 5, 8, 30),
               child: GestureDetector(
                 onVerticalDragUpdate: (details) {
                   if (details.delta.dy < -5) {

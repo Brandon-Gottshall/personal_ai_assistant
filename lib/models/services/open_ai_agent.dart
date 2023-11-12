@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/database.dart';
 import 'dart:async';
 import '../data/message.dart';
 
@@ -14,12 +15,15 @@ class OpenAIAgent {
   // Singleton instance getter.
   static OpenAIAgent get instance => _instance;
 
+  // Database service.
+  final databaseService = DatabaseService();
+
   // Thread and run identifiers.
-  String _threadId = '';
+  String _currentThreadId = '';
   String _currentRunId = '';
 
   // API key for OpenAI.
-  final String apiKey = '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';
+  final String apiKey = '***REMOVED***';
 
   // Timer for periodically checking the run status.
   Timer? _timer;
@@ -30,16 +34,6 @@ class OpenAIAgent {
   // Stream getter.
   Stream<List<Message>> get messagesStream => _messagesController.stream;
 
-  // Updates the messages stream with the provided messages.
-  void _updateMessages(List<Message> messages, {bool initialUpdate = false}) {
-    // If there are more than one messages, and this is not the initial update,
-    // then the last message is the one we want to add to the stream.
-    if (messages.length > 1 && !initialUpdate) {
-      _messagesController.add([messages[0]]);
-    } else {
-      _messagesController.add(messages);
-    }
-  }
 
   // Constructor for singleton pattern.
   factory OpenAIAgent() {
@@ -48,24 +42,48 @@ class OpenAIAgent {
 
   OpenAIAgent._internal();
 
+  // Connects to the database and initializes the agent.
+  Future<void> connectToDatabase() async {
+    LoggerService().log('Connecting to database...');
+    await databaseService.connect(
+      databaseName: 'my_ai_assistant',
+      username: 'postgres',
+      password: 'password',
+    );
+    LoggerService().log('Connected to database successfully.');
+  }
+
   // Initializes the agent by loading saved thread and run IDs.
   Future<void> initialize() async {
     LoggerService().log('Initializing OpenAIAgent...');
     final prefs = await SharedPreferences.getInstance();
-    _threadId = prefs.getString('threadId') ?? '';
+    _currentThreadId = prefs.getString('threadId') ?? '';
     _currentRunId = prefs.getString('currentRunId') ?? '';
 
     // Create a new thread if none exists.
-    if (_threadId.isEmpty) {
+    if (_currentThreadId.isEmpty) {
       LoggerService().log('No existing thread found. Creating a new thread...');
-      _threadId = await createThread();
-      await prefs.setString('threadId', _threadId);
-      LoggerService().log('New thread created with ID: $_threadId');
+      _currentThreadId = await createThread();
+      await prefs.setString('currentThreadId', _currentThreadId);
+      LoggerService().log('New thread created with ID: $_currentThreadId');
+      // Add new thread ID to database.
+      await databaseService.insertThreadID(_currentThreadId);
     } else {
-      LoggerService().log('Existing thread found with ID: $_threadId');
+      LoggerService().log('Existing thread found with ID: $_currentThreadId');
       // Retrieve and update messages upon initialization.
       final messages = await getMessages();
       _updateMessages(messages, initialUpdate: true);
+    }
+  }
+
+  // Updates the messages stream with the provided messages.
+  void _updateMessages(List<Message> messages, {bool initialUpdate = false}) {
+    // If there are more than one messages, and this is not the initial update,
+    // then the last message is the one we want to add to the stream.
+    if (messages.length > 1 && !initialUpdate) {
+      _messagesController.add([messages[0]]);
+    } else {
+      _messagesController.add(messages);
     }
   }
 
@@ -92,9 +110,14 @@ class OpenAIAgent {
     }
   }
 
+  // Stores the provided thread ID.
+  void setThreadId(String threadId) {
+    _currentThreadId = threadId;
+  }
+
   // Adds a user message to the current thread.
   Future<void> addMessageToThread(String userMessage) async {
-    if (_threadId.isEmpty) {
+    if (_currentThreadId.isEmpty) {
       LoggerService().log('Thread ID is not set. Unable to add message.');
       return;
     }
@@ -102,7 +125,7 @@ class OpenAIAgent {
     // Add message to UI
     _updateMessages([Message(text: userMessage, isUserMessage: true)]);
 
-    final url = Uri.parse('https://api.openai.com/v1/threads/$_threadId/messages');
+    final url = Uri.parse('https://api.openai.com/v1/threads/$_currentThreadId/messages');
     final response = await http.post(
       url,
       headers: {
@@ -126,12 +149,12 @@ class OpenAIAgent {
 
   // Initiates a run on the current thread.
   Future<void> createRun() async {
-    if (_threadId.isEmpty) {
+    if (_currentThreadId.isEmpty) {
       LoggerService().log('Thread ID is not set. Unable to create run.');
       return;
     }
 
-    final url = Uri.parse('https://api.openai.com/v1/threads/$_threadId/runs');
+    final url = Uri.parse('https://api.openai.com/v1/threads/$_currentThreadId/runs');
     final response = await http.post(
       url,
       headers: {
@@ -163,7 +186,7 @@ class OpenAIAgent {
       return;
     }
 
-    final url = Uri.parse('https://api.openai.com/v1/threads/$_threadId/runs/$_currentRunId');
+    final url = Uri.parse('https://api.openai.com/v1/threads/$_currentThreadId/runs/$_currentRunId');
     final response = await http.get(
       url,
       headers: {
@@ -205,12 +228,12 @@ class OpenAIAgent {
 
   // Retrieves messages from the current thread.
   Future<List<Message>> getMessages() async {
-    if (_threadId.isEmpty) {
+    if (_currentThreadId.isEmpty) {
       LoggerService().log('Thread ID is not set. Unable to retrieve messages.');
       return [];
     }
 
-    final url = Uri.parse('https://api.openai.com/v1/threads/$_threadId/messages');
+    final url = Uri.parse('https://api.openai.com/v1/threads/$_currentThreadId/messages');
     final response = await http.get(
       url,
       headers: {
@@ -230,6 +253,7 @@ class OpenAIAgent {
       return messages;
     } else {
       LoggerService().log('Failed to retrieve messages. Status code: ${response.statusCode}.');
+      LoggerService().log('Response body: ${response.body}');
       return [];
     }
   }

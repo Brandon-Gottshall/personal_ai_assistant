@@ -11,16 +11,12 @@ class SettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
+          // This setting get's permissions for Apple Reminders
           ListTile(
-            title: const Text('Setting 1'),
+            title: const Text('Reminders Permissions'),
+            tileColor: Colors.grey[300],
             onTap: () {
-              // Handle tap for Setting 1
-            },
-          ),
-          ListTile(
-            title: const Text('Setting 2'),
-            onTap: () {
-              // Handle tap for Setting 2
+              // Handle tap for Apple Reminders
             },
           ),
           // Add more ListTile widgets for more settings options
