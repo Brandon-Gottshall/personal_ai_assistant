@@ -22,8 +22,10 @@ It is a work in progress and is currently in the early stages of development.
     - [ ] Microsoft To-Do
     - [ ] Microsoft Calendar
 - [ ] Create a mechanism for the assistant to be able to add, remove, and modify tasks and events on all integrated platforms.
-  - [ ] This may be through the use of Microsoft's Python Library AutoGen.
-    - Python can be run in Dart using the (`python_ffi`)[https://pub.dev/packages/python_ffi] library.
+  - This may be through the use of Microsoft's Python Library AutoGen.
+    - PYPI: [`pyautogen`](https://pypi.org/project/pyautogen/)
+      - `pip install pyautogen`
+  - Python can be run in Dart using the [`python_ffi`](https://pub.dev/packages/python_ffi) library.
   
 - [ ] Executive Planning
   - [ ] Daily Briefing

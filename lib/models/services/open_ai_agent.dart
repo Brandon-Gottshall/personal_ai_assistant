@@ -23,7 +23,7 @@ class OpenAIAgent {
   String _currentRunId = '';
 
   // API key for OpenAI.
-  final String apiKey = '***REMOVED***';
+  final String apiKey = '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';
 
   // Timer for periodically checking the run status.
   Timer? _timer;
